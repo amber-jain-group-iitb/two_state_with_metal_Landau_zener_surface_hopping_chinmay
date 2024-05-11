@@ -1,0 +1,10 @@
+Numerical Marcus surface hopping codes for the Holstein model.
+
+To compile, issue make. The makefile tells the compiling options.
+After compiliing, ./aout can be issued to run the job on the current processor.
+
+./run (together with sub.sh) is designed to run the codes on nodes on our cluster. It should be relatively easy to change to run on different environments. The first parameter in AFSSH.inp - iflow - directs how the code will be run. If iflow=1, it is run serially on a single node. 
+If iflow=2, trajectories are parallelized. For iflow=2, after all jobs are completed, set iflow=3 (in AFSSH.inp) and again issue ./run to generate the averaged file (from the various folders that will be created for iflow=2). These are also attached if needed.
+
+
+The output is in the file pop.out. The columns are - time (fs), diabatic populations of (1) population of the first molecular state (2) population of the second molecular state, (3) population of state (0,0) means when no molecular state is occupied (4) population of state (0,1) (5) population of state (1,0) (6) population of state (1,1)
