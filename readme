@@ -2,7 +2,7 @@ Landau-Zener Surface hopping code for the Holstein model.
 
 The code is entirely in mod_afssh.f90. The input file is in AFSSH.inp.
 
-The Analytical form of marcus benchmark is in matrix evolve which also takes input form AFSSH.inp
+The Analytical form of marcus benchmark is in matrix_evolve.py which also takes input form AFSSH.inp
 
 To compile, issue make. The makefile tells the compiling options.
 After compiliing, ./aout can be issued to run the job on the current processor.
