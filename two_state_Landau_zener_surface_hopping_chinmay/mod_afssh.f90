@@ -444,9 +444,13 @@ subroutine init_cond
 
   
   if (mol_LUMO==2) then
-      do i=1,n_el
+!    state(1)=2 ! AO
+!    do i=mol_LUMO+1,n_el+1
+!        state(i-1)=i !(one LUMO filled)
+!    enddo
+    do i=1,n_el
         state(i)=i+1
-      end do
+    enddo
   else
     do i=1,n_el
         state(i)=i+1
@@ -455,6 +459,7 @@ subroutine init_cond
 
 
       
+  write(123,*) state
   curr_time=0.d0
   call setup_parameters(pos,state)
 
@@ -472,6 +477,7 @@ x_old=pos
 V_k_old=V_k
 
 gamma_B=2*omega
+!gamma_B=6*omega
 gama_dt=gamma_B*dtc
 c0=dexp(-gama_dt)
 c1=1.d0/gama_dt*(1.d0-c0)
@@ -884,7 +890,7 @@ end subroutine draw_pes
 !----------------------------------------------------------------- 
 function TSE(istate,px)
 real*8 TSE,px(nclass),E0,E1,E2
-integer istate(n_el),d,i
+integer istate(n_el),d,i,lst
 
 TSE=0.d0
 
@@ -903,15 +909,29 @@ if (mol_LUMO==1) then
     end do
 end if
 
+!if (mol_LUMO==2) then
+!    if (any(1==istate).and.any(2==istate)) then
+!        TSE=TSE+E2
+!    else if (any(1==istate).or.any(2==istate)) then
+!        TSE=TSE+0.5*omega**2*mass(1)*(px(1)**2-2*gh*px(1)+2*gh**2)+exo
+!    else
+!        TSE=TSE+E0
+!    end if    
+!end if
+
+lst=0
 if (mol_LUMO==2) then
-    if (any(1==istate).and.any(2==istate)) then
-        TSE=TSE+E2
-    else if (any(1==istate).or.any(2==istate)) then
-        TSE=TSE+0.5*omega**2*mass(1)*(px(1)**2-2*gh*px(1)+2*gh**2)+exo
-    else
-        TSE=TSE+E0
-    end if    
+    do i=1,mol_LUMO
+        if (any(i==istate)) then
+            lst=lst+1
+        end if
+    enddo
+    if (lst==0) TSE=TSE+E0
+    if (lst==1) TSE=TSE+0.5*omega**2*mass(1)*(px(1)**2-2*gh*px(1)+2*gh**2)+exo
+    if (lst==2) TSE=TSE+E2
 end if
+
+
 
 
 
@@ -968,10 +988,11 @@ dloop : do  d=1,mol_LUMO
                  exo_new=TSE(state,pos)-TSE(state_new,pos)
                  old_energy=TSE(state,x_old)-TSE(state_new,x_old)
 
-                if (exo_new*old_energy<0) then  
+                if (exo_new*old_energy<0) then 
                     coup=Vc(temp)
                     Gam=abs(-mass(1)*omega**2*gh*v(1))
-                    LZ=2*pi*coup**2/Gam
+
+                    LZ=LZ+2*pi*coup**2/Gam
                     if (LZ<0.d0) LZ=0.d0
                     if(rnd<LZ) then
                          state=state_new
@@ -997,7 +1018,7 @@ dloop : do  d=1,mol_LUMO
             if (exo_new*old_energy<0) then
                 coup=Vc(i)
                 Gam=abs(-mass(1)*omega**2*gh*v(1))
-                LZ=2*pi*coup**2/Gam
+                LZ=LZ+2*pi*coup**2/Gam
                 if (LZ<0.d0) LZ=0.d0
                 if(rnd<LZ) then
                     state=state_new
